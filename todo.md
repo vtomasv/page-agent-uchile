@@ -1,5 +1,11 @@
 # Publicación pública y Docker
 
+## Corrección del build Docker
+
+- [x] Copiar `patches/` antes de ejecutar `pnpm install --frozen-lockfile`.
+- [x] Verificar que el Dockerfile ya no falle por `wouter@3.7.1.patch` ausente.
+- [ ] Publicar la corrección en GitHub y reintentar `docker compose up --build`.
+
 - [x] Leer la guía de persistent computing y confirmar el enfoque Docker compatible con WebDev.
 - [x] Añadir Dockerfile de producción y configuración de prueba aislada.
 - [x] Añadir documentación de build, ejecución, puertos y limitaciones del contenedor.

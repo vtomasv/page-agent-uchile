@@ -7,6 +7,7 @@ WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 
 COPY package.json pnpm-lock.yaml ./
+COPY patches ./patches
 RUN corepack enable && pnpm install --frozen-lockfile
 
 COPY . .
