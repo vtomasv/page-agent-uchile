@@ -1,0 +1,8 @@
+.git
+.github
+.manus-logs
+dist
+node_modules
+screenshots
+todo.md
+*.log

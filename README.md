@@ -16,6 +16,28 @@ pnpm check
 pnpm build
 ```
 
+## Probar con Docker
+
+El contenedor final utiliza únicamente Nginx para servir los archivos estáticos compilados. No ejecuta Node, Express, API routes ni ningún proceso de inferencia en el servidor. Para construir y levantar la imagen:
+
+```bash
+docker compose up --build
+```
+
+Después abre [http://localhost:8080](http://localhost:8080). La configuración aplica un contenedor de solo lectura, elimina capacidades Linux y activa `no-new-privileges`. El navegador sigue siendo el runtime del agente y puede descargar modelos desde Hugging Face cuando se activa la carga del LLM desde `/admin`.
+
+Para una prueba sin red de salida del contenedor, utiliza:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.offline.yml up --build
+```
+
+Este modo sirve la interfaz, el snapshot local y el camino grounded determinista, pero no puede descargar modelos que no estén ya disponibles en la caché del navegador. Para detener y limpiar el entorno:
+
+```bash
+docker compose down --rmi local
+```
+
 ## Rutas incluidas
 
 | Ruta | Propósito |

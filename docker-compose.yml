@@ -1,0 +1,17 @@
+services:
+  page-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: page-agent-uchile:local
+    ports:
+      - "8080:80"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /var/cache/nginx:rw,noexec,nosuid,size=32m
+      - /var/run:rw,noexec,nosuid,size=4m
+    restart: "no"

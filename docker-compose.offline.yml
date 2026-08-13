@@ -1,0 +1,3 @@
+services:
+  page-agent:
+    network_mode: "none"
