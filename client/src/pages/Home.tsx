@@ -1,25 +1,23 @@
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from 'streamdown';
+// Style reminder: Archivo editorial cívico — asymmetry, warm paper, and visible page awareness.
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Best Practices, Design Guide and Common Pitfalls
- */
+import { ArrowDown, ArrowUpRight, BookOpenText, CalendarDays, CircleHelp, Layers3, LockKeyhole, Sparkles } from "lucide-react";
+import { Link } from "wouter";
+import { AppShell } from "@/components/AppShell";
+import { CourseCard } from "@/components/CourseCard";
+import { RuntimeBadge } from "@/components/RuntimeBadge";
+import { courses } from "@/content/courses";
+import { siteSections } from "@/content/site";
+import { useAgent } from "@/contexts/AgentContext";
+
 export default function Home() {
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
-    </div>
-  );
+  const { openChat } = useAgent();
+  return <AppShell>
+    <section className="hero-section" id="inicio"><div className="hero-copy"><span className="eyebrow"><span className="eyebrow-line" /> Educación Continua DCC</span><h1>La tecnología<br /><em>evoluciona,</em><br />tú también.</h1><p className="hero-lede">Programas para moverte con criterio en un mundo que cambia rápido. Ahora, con una página que puede ayudarte a leer sus propias rutas.</p><div className="hero-actions"><button className="primary-button" onClick={openChat}>Pregúntale a esta página <Sparkles size={16} /></button><a href="#programas" className="text-link light-link">Explorar la oferta <ArrowDown size={16} /></a></div><div className="hero-note"><span className="status-dot" data-state="ready" />Asistente local disponible <span>·</span> sin envío de preguntas</div></div><div className="hero-visual"><img src="/manus-storage/page-agent-hero_acff96bf.jpg" alt="Mesa de trabajo con materiales de aprendizaje y tecnología" /><div className="hero-stamp"><span>01</span><strong>Lee<br />la página</strong><ArrowDown size={15} /></div><div className="hero-caption">Una capa de lectura, no una caja negra.</div></div></section>
+    <section className="mode-band"><div className="mode-icon"><BookOpenText size={25} /></div><div><span className="eyebrow">Modalidad online · clases en vivo</span><strong>Sigue aprendiendo, sigue avanzando.</strong></div><a href="#contacto" className="secondary-button">Postula aquí <ArrowUpRight size={15} /></a></section>
+    <section className="intro-section" id="section-about"><div className="section-number">02 <span>/ contexto</span></div><div className="intro-grid"><div><span className="eyebrow dark-eyebrow">¿Quiénes somos?</span><h2>Formación que<br /><em>conecta.</em></h2></div><div><p className="intro-lede">Bienvenidos a Educación Continua del Departamento de Ciencias de la Computación de la Universidad de Chile.</p><p>En Educación Continua DCC te conectamos con el futuro de la tecnología. Ofrecemos Magíster, Diplomas, Cursos y Bootcamps diseñados para potenciar tus habilidades, mantenerte actualizado o reinventar tu carrera profesional.</p><div className="intro-proof"><span><strong>100%</strong> online y en vivo</span><span><strong>1</strong> página que puede leerse</span></div></div></div></section>
+    <section className="programs-section" id="programas"><div className="section-heading-row"><div><span className="eyebrow dark-eyebrow">Una selección para empezar</span><h2>Rutas para el<br /><em>próximo paso.</em></h2></div><Link href="/cursos" className="outline-button">Ver todos los cursos <ArrowUpRight size={16} /></Link></div><div className="course-grid">{courses.slice(0, 4).map((course, index) => <CourseCard key={course.id} course={course} index={index} />)}</div><div className="programs-callout"><div><span className="eyebrow dark-eyebrow">¿No sabes por dónde empezar?</span><h3>Deja que el catálogo<br />te devuelva una pregunta.</h3></div><button className="primary-button dark-button" onClick={openChat}>Conversar sobre opciones <CircleHelp size={16} /></button></div></section>
+    <section className="agent-section"><div className="agent-section-visual"><img src="/manus-storage/page-agent-programs_6c702a0b.jpg" alt="Materiales editoriales y tecnológicos sobre una mesa" /><div className="agent-quote">“La página no necesita<br /><em>adivinarte.</em> Puede mostrarte<br />de dónde viene cada respuesta.”</div></div><div className="agent-section-copy"><span className="eyebrow dark-eyebrow">Page awareness / 03</span><h2>Una página que<br /><em>se explica.</em></h2><p>Pregunta por fechas, duración, objetivos o diferencias. El asistente prioriza la ficha que estás leyendo, consulta el catálogo local cuando hace falta y convierte la respuesta en contenido temporal dentro de la página.</p><div className="agent-principles"><div><LockKeyhole size={18} /><span><strong>Local por diseño</strong>Inferencia en tu navegador, con fallback claro.</span></div><div><Layers3 size={18} /><span><strong>Temporal y reversible</strong>Los artifacts se pueden descartar o restaurar.</span></div><div><CalendarDays size={18} /><span><strong>Con fuentes</strong>Accede al fragmento que fundamentó cada respuesta.</span></div></div><button className="text-link" onClick={openChat}>Probar con una pregunta <ArrowUpRight size={16} /></button></div></section>
+    <section className="context-section" id="section-programs"><div className="section-number">04 <span>/ el snapshot</span></div><div className="context-grid">{siteSections.slice(1, 3).map((section) => <article key={section.id} id={`section-${section.id}`}><span className="eyebrow dark-eyebrow">{section.eyebrow}</span><h3>{section.title}</h3><p>{section.body}</p>{section.bullets && <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>}</article>)}</div></section>
+    <section className="offline-note"><div className="offline-text"><span className="eyebrow dark-eyebrow">Preparado para el dispositivo</span><h2>Tu contexto<br /><em>permanece contigo.</em></h2><p>Después de descargar los modelos, el snapshot y la memoria pueden reutilizarse sin enviar tus preguntas a un servidor de inferencia.</p></div><RuntimeBadge /><div className="texture-panel"><span>05</span><strong>Offline<br />ready</strong></div></section>
+  </AppShell>;
 }

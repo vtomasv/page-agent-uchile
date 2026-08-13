@@ -1,0 +1,9 @@
+{
+  "name": "Page Agent · Educación Continua DCC",
+  "short_name": "Page Agent",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f1ea",
+  "theme_color": "#242321",
+  "icons": [{ "src": "/manus-storage/page-agent-mark_4c100dab.png", "sizes": "192x192", "type": "image/png" }]
+}

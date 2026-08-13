@@ -4,13 +4,20 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AgentProvider } from "./contexts/AgentContext";
 import Home from "./pages/Home";
+import Courses from "./pages/Courses";
+import CourseDetail from "./pages/CourseDetail";
+import Admin from "./pages/Admin";
 
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/cursos"} component={Courses} />
+      <Route path={"/cursos/:slug"} component={CourseDetail} />
+      <Route path={"/admin"} component={Admin} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -32,7 +39,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <AgentProvider><Router /></AgentProvider>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
