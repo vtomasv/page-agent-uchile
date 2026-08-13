@@ -24,7 +24,7 @@ El contenedor final utiliza únicamente Nginx para servir los archivos estático
 docker compose up --build
 ```
 
-Después abre [http://localhost:8080](http://localhost:8080). La configuración aplica un contenedor de solo lectura, elimina capacidades Linux y activa `no-new-privileges`. El navegador sigue siendo el runtime del agente y puede descargar modelos desde Hugging Face cuando se activa la carga del LLM desde `/admin`.
+Después abre [http://localhost:8080](http://localhost:8080). La configuración aplica un contenedor de solo lectura, omite el entrypoint de configuración dinámica de Nginx, elimina todas las capacidades Linux salvo las mínimas requeridas por Nginx (`CHOWN`, `SETUID`, `SETGID` y `NET_BIND_SERVICE`) y activa `no-new-privileges`. El navegador sigue siendo el runtime del agente y puede descargar modelos desde Hugging Face cuando se activa la carga del LLM desde `/admin`.
 
 Para una prueba sin red de salida del contenedor, utiliza:
 
