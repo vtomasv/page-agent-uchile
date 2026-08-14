@@ -56,3 +56,26 @@
   .curriculum-course-select { display:block; }
   .curriculum-course-select select { display:block; width:100%; margin-top:8px; }
 }
+
+.admin-notice { display:flex; align-items:center; gap:9px; margin:0 0 20px; padding:12px 14px; border:1px solid var(--line); color:var(--ink); background:#fffdf7; font-size:11px; }
+.admin-notice.success { border-left:3px solid var(--teal); }
+.admin-notice.error { border-left:3px solid var(--maroon); color:var(--maroon); }
+.admin-notice button { margin-left:auto; padding:2px; color:inherit; background:transparent; }
+.admin-action-state { display:flex; align-items:center; gap:8px; margin-top:12px; color:var(--ink-soft); font-size:10px; line-height:1.4; }
+.admin-action-state .status-dot.is-error { background:var(--maroon); }
+.admin-test-result { margin-top:16px; padding:13px 15px; border-left:3px solid var(--teal); background:var(--mint); }
+.admin-test-result strong { display:block; margin-bottom:5px; color:var(--teal); font-size:10px; letter-spacing:.06em; text-transform:uppercase; }
+.admin-test-result p { margin:0; color:var(--ink); font-size:11px; line-height:1.6; }
+.admin-test-result.is-error { border-left-color:var(--maroon); background:#f6e8e8; }
+.admin-test-result.is-error strong { color:var(--maroon); }
+.retrieval-status { display:flex; align-items:baseline; gap:12px; margin-top:17px; padding-top:13px; border-top:1px solid var(--line); }
+.retrieval-status strong { color:var(--teal); font-size:12px; }
+.retrieval-status span { color:var(--ink-soft); font-size:10px; }
+.retrieval-results { display:grid; gap:8px; margin-top:12px; }
+.retrieval-result { display:flex; justify-content:space-between; gap:14px; padding:12px; background:#fffdf7; border:1px solid var(--line); }
+.retrieval-result div { min-width:0; }
+.retrieval-result strong,.retrieval-result span { display:block; }
+.retrieval-result strong { color:var(--ink); font-family:"DM Serif Display",serif; font-size:17px; font-weight:400; }
+.retrieval-result span { margin-top:4px; color:var(--ink-soft); font-size:10px; line-height:1.5; }
+.retrieval-result b { flex:0 0 auto; color:var(--maroon); font-size:11px; }
+.retrieval-empty { margin-top:15px; padding:13px; color:var(--ink-soft); background:#f4f0e8; font-size:10px; line-height:1.5; }

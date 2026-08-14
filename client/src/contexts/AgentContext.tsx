@@ -23,6 +23,9 @@ type AgentContextValue = {
   status: AgentStatus;
   modelStatus: "idle" | "downloading" | "ready" | "error";
   modelProgress: number;
+  modelError: string | null;
+  modelTestStatus: "idle" | "running" | "ready" | "error";
+  modelTestResult: string;
   runtime: RuntimeCapabilities | null;
   config: HarnessConfig;
   setConfig: (config: HarnessConfig) => void;
@@ -42,6 +45,7 @@ type AgentContextValue = {
   undoArtifact: () => void;
   focusSource: (sourceId: string) => void;
   preloadLLM: () => void;
+  testModel: () => void;
 };
 
 type SpeechRecognitionLike = {
@@ -71,6 +75,9 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const [runtime, setRuntime] = useState<RuntimeCapabilities | null>(null);
   const [modelStatus, setModelStatus] = useState<AgentContextValue["modelStatus"]>("idle");
   const [modelProgress, setModelProgress] = useState(0);
+  const [modelError, setModelError] = useState<string | null>(null);
+  const [modelTestStatus, setModelTestStatus] = useState<AgentContextValue["modelTestStatus"]>("idle");
+  const [modelTestResult, setModelTestResult] = useState("");
   const [mutations, setMutations] = useState<ReturnType<ArtifactManager["getAll"]>>([]);
   const managerRef = useRef<ArtifactManager | undefined>(undefined);
   const workerRef = useRef<Worker | undefined>(undefined);
@@ -189,16 +196,31 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 
   const preloadLLM = () => {
     if (modelStatus === "downloading" || modelStatus === "ready") return;
+    setModelError(null);
     setModelStatus("downloading");
     setModelProgress(6);
     const worker = new Worker(new URL("@/workers/llm.worker.ts", import.meta.url), { type: "module" });
     workerRef.current = worker;
     worker.onmessage = (event: MessageEvent<any>) => {
       if (event.data.type === "download-progress") setModelProgress(Math.max(8, Math.round(event.data.payload.progress ?? 8)));
-      if (event.data.type === "model-ready") { setModelProgress(100); setModelStatus("ready"); }
-      if (event.data.type === "error") setModelStatus("error");
+      if (event.data.type === "model-ready") { setModelProgress(100); setModelStatus("ready"); setModelError(null); }
+      if (event.data.type === "token" && event.data.requestId?.startsWith("model-test-")) setModelTestResult((current) => current + (event.data.text ?? ""));
+      if (event.data.type === "complete" && event.data.requestId?.startsWith("model-test-")) { setModelTestStatus("ready"); setModelTestResult(event.data.payload?.text ?? modelTestResult); }
+      if (event.data.type === "error") { setModelError(event.data.message ?? "No fue posible cargar o ejecutar el modelo local."); if (event.data.requestId?.startsWith("model-test-")) setModelTestStatus("error"); else setModelStatus("error"); }
     };
     worker.postMessage({ type: "load-model", config: config.models.llm });
+  };
+
+  const testModel = () => {
+    if (modelStatus !== "ready" || !workerRef.current) {
+      setModelError("Primero carga el modelo local; después vuelve a pulsar Probar.");
+      setModelTestStatus("error");
+      return;
+    }
+    const requestId = `model-test-${Date.now()}`;
+    setModelTestStatus("running");
+    setModelTestResult("");
+    workerRef.current.postMessage({ type: "generate", requestId, messages: [createMessage("user", "Responde en una frase breve confirmando que el modelo local está activo.")], systemPrompt: config.prompt.system, config: config.models.llm });
   };
 
   const focusSource = (sourceId: string) => {
@@ -219,6 +241,9 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     status,
     modelStatus,
     modelProgress,
+    modelError,
+    modelTestStatus,
+    modelTestResult,
     runtime,
     config,
     setConfig,
@@ -238,7 +263,8 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     undoArtifact: () => managerRef.current?.undo(),
     focusSource,
     preloadLLM,
-  }), [route, currentChunks, messages, mutations, status, modelStatus, modelProgress, runtime, config]);
+    testModel,
+  }), [route, currentChunks, messages, mutations, status, modelStatus, modelProgress, modelError, modelTestStatus, modelTestResult, runtime, config]);
 
   return <AgentContext.Provider value={value}>{children}</AgentContext.Provider>;
 }

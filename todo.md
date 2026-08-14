@@ -37,6 +37,14 @@
 - [x] Añadir pruebas de regresión para gráficos y precedencias.
 - [ ] Verificar visualmente, ejecutar build y publicar en GitHub.
 
+## Admin: acciones no funcionales
+
+- [x] Auditar callbacks de `Ejecutar retrieval`, `Cargar modelo local`, `Descargar / cargar` y `Probar`.
+- [x] Implementar resultados visibles y estados de error para cada acción.
+- [x] Hacer que exportar/importar configuración use archivos JSON descargables y seleccionables.
+- [x] Añadir pruebas de regresión de las acciones Admin.
+- [ ] Verificar Admin, build y publicar la corrección.
+
 - [x] Leer la guía de persistent computing y confirmar el enfoque Docker compatible con WebDev.
 - [x] Añadir Dockerfile de producción y configuración de prueba aislada.
 - [x] Añadir documentación de build, ejecución, puertos y limitaciones del contenedor.
