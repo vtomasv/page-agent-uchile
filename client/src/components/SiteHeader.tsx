@@ -14,7 +14,7 @@ export function SiteHeader() {
     <header className="site-header" data-agent-chrome>
       <div className="top-strip">
         <div className="brand-lockup">
-          <img src="/manus-storage/page-agent-mark_4c100dab.png" alt="" className="brand-mark" />
+          <img src="/assets/page-agent-mark.png" alt="" className="brand-mark" />
           <div>
             <span className="brand-overline">Departamento de Ciencias de la Computación</span>
             <span className="brand-title">Universidad de Chile</span>

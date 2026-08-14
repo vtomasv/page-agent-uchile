@@ -1,0 +1,5 @@
+/* Portable asset layer: local Docker/GitHub assets override Manus-only URLs from the original design sheet. */
+.texture-panel,
+.catalog-hero {
+  background-image: url('/assets/page-agent-texture.png') !important;
+}

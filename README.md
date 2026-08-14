@@ -74,7 +74,7 @@ La ruta `/admin` no es un perímetro de seguridad: es una consola UX de demostra
 
 La jerarquía visual de la réplica se inspiró en la página pública de Educación Continua DCC: navegación institucional, subnavegación de Educación Continua, titular “La tecnología evoluciona, tú también”, modalidad online, secciones de programas y contacto [1]. La decisión de pinnear Transformers.js 4.2.0 se tomó contrastando la versión npm publicada con la documentación oficial y el árbol oficial de ejemplos conversacionales WebGPU [2] [3] [4].
 
-La dirección visual es **Archivo editorial cívico**: DM Serif Display para titulares, Manrope para UI, marfil de papel, carbón, granate académico y verde mineral contextual. Los activos visuales son originales y se referencian con URLs de almacenamiento gestionado por el proyecto.
+La dirección visual es **Archivo editorial cívico**: DM Serif Display para titulares, Manrope para UI, marfil de papel, carbón, granate académico y verde mineral contextual. Los activos visuales originales están versionados en `client/public/assets/` y se sirven mediante rutas relativas como `/assets/page-agent-hero.png`, por lo que funcionan en Vite, Docker y GitHub Pages sin depender de `/manus-storage`.
 
 ## Limitaciones conocidas
 

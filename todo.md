@@ -12,6 +12,14 @@
 - [x] Configurar directorios temporales Nginx escribibles y permisos compatibles con el contenedor.
 - [ ] Verificar `docker compose up` y publicar el ajuste en GitHub.
 
+## Assets locales y Docker
+
+- [x] Auditar todas las referencias `/manus-storage` y URLs externas de recursos.
+- [x] Copiar las imágenes usadas por la interfaz a `client/public/assets`.
+- [x] Actualizar JSX, CSS, manifest y documentación para usar rutas relativas locales.
+- [x] Verificar que las rutas ejecutadas ya no dependan de `/manus-storage`.
+- [ ] Ejecutar checks/build y publicar la corrección en GitHub.
+
 - [x] Leer la guía de persistent computing y confirmar el enfoque Docker compatible con WebDev.
 - [x] Añadir Dockerfile de producción y configuración de prueba aislada.
 - [x] Añadir documentación de build, ejecución, puertos y limitaciones del contenedor.
