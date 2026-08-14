@@ -1,6 +1,6 @@
 // Style reminder: Archivo editorial cívico — course data is the factual spine behind every artifact.
 
-import type { ContextChunk, Course } from "@/lib/types";
+import type { ContextChunk, Course, CurriculumModule } from "@/lib/types";
 
 export const courses: Course[] = [
   {
@@ -175,6 +175,22 @@ export const courses: Course[] = [
 
 export const courseById = Object.fromEntries(courses.map((course) => [course.id, course])) as Record<string, Course>;
 
+const stageByIndex: CurriculumModule["stage"][] = ["base", "core", "core", "applied", "capstone"];
+
+export const curriculumByCourse = Object.fromEntries(courses.map((course) => {
+  const totalHours = Number(course.duration.match(/\d+/)?.[0] ?? 20);
+  const moduleHours = Math.max(2, Math.round(totalHours / Math.max(1, course.contents.length)));
+  const modules = course.contents.map((title, index): CurriculumModule => ({
+    id: `${course.id}-module-${index + 1}`,
+    title,
+    stage: stageByIndex[Math.min(index, stageByIndex.length - 1)],
+    sequence: index + 1,
+    hours: index === course.contents.length - 1 ? Math.max(2, totalHours - moduleHours * (course.contents.length - 1)) : moduleHours,
+    prerequisites: index === 0 ? course.requirements : [`${course.id}-module-${index}`],
+  }));
+  return [course.id, modules];
+})) as Record<string, CurriculumModule[]>;
+
 export const courseChunks: ContextChunk[] = courses.flatMap((course) => [
   {
     id: `course:${course.id}:overview`,
@@ -204,6 +220,16 @@ export const courseChunks: ContextChunk[] = courses.flatMap((course) => [
     heading: `Contenidos · ${course.title}`,
     text: course.contents.join(". "),
     selector: `#${course.id}-contents`,
+    source: "structured-content",
+  },
+  {
+    id: `course:${course.id}:curriculum`,
+    route: `/cursos/${course.slug}`,
+    entityType: "course",
+    entityId: course.id,
+    heading: `Malla y precedencias · ${course.title}`,
+    text: curriculumByCourse[course.id].map((module) => `${module.sequence}. ${module.title}. Etapa: ${module.stage}. ${module.prerequisites.length ? `Prerequisitos: ${module.prerequisites.join(", ")}.` : "Sin prerequisitos."}`).join(" "),
+    selector: `#${course.id}-curriculum`,
     source: "structured-content",
   },
 ]);

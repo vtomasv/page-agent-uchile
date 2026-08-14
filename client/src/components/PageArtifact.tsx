@@ -7,11 +7,11 @@ import { useAgent } from "@/contexts/AgentContext";
 import { SourceChip } from "@/components/SourceChip";
 import { courseChunks } from "@/content/courses";
 import { siteChunks } from "@/content/site";
-import type { AgentUIArtifact, ComparisonData, Course } from "@/lib/types";
+import type { AgentUIArtifact, ComparisonData, Course, CurriculumData, CurriculumModule } from "@/lib/types";
 
 function ArtifactHeader({ artifact, onClose }: { artifact: AgentUIArtifact; onClose: () => void }) {
   const { speak } = useAgent();
-  return <div className="artifact-header"><div className="artifact-label"><span className="artifact-badge">Generado por el asistente</span><span className="artifact-type">{artifact.type === "comparison" ? "Comparación" : artifact.type === "summary" ? "Resumen" : artifact.type === "recommendation" ? "Recomendación" : "Selección"}</span></div><div className="artifact-actions"><button onClick={() => speak(`${artifact.title}. ${artifact.subtitle ?? ""}`)} aria-label="Escuchar artifact"><Headphones size={15} /></button><button onClick={onClose} aria-label="Descartar artifact"><X size={16} /></button></div></div>;
+  return <div className="artifact-header"><div className="artifact-label"><span className="artifact-badge">Generado por el asistente</span><span className="artifact-type">{artifact.type === "comparison" ? "Comparación" : artifact.type === "curriculum" ? "Malla" : artifact.type === "summary" ? "Resumen" : artifact.type === "recommendation" ? "Recomendación" : "Selección"}</span></div><div className="artifact-actions"><button onClick={() => speak(`${artifact.title}. ${artifact.subtitle ?? ""}`)} aria-label="Escuchar artifact"><Headphones size={15} /></button><button onClick={onClose} aria-label="Descartar artifact"><X size={16} /></button></div></div>;
 }
 
 function SourceRow({ ids }: { ids: string[] }) {
@@ -49,7 +49,33 @@ function RecommendationArtifact({ artifact, onClose }: { artifact: AgentUIArtifa
   return <section className="page-artifact artifact-recommendation" id={artifact.id} data-agent-artifact><ArtifactHeader artifact={artifact} onClose={onClose} /><div className="artifact-body"><div className="recommendation-flag"><BookOpen size={18} /><span>Lectura basada en datos de la página</span></div><h2>{artifact.title}</h2><p className="artifact-subtitle">{artifact.subtitle}</p><div className="recommendation-box"><strong>{data.course.title}</strong><p>{data.reason}</p><Link href={`/cursos/${data.course.slug}`} className="text-link">Revisar objetivos y contenidos <ArrowUpRight size={15} /></Link></div><p className="artifact-disclaimer">No es una clasificación universal ni una promesa de resultado. Es una interpretación explícita basada en los datos visibles del snapshot.</p></div><SourceRow ids={artifact.sources} /></section>;
 }
 
+function stageLabel(stage: CurriculumModule["stage"]) {
+  return ({ base: "Base", core: "Núcleo", applied: "Aplicado", capstone: "Proyecto" } as Record<CurriculumModule["stage"], string>)[stage];
+}
+
+function CurriculumArtifact({ artifact, onClose }: { artifact: AgentUIArtifact; onClose: () => void }) {
+  const data = artifact.data as CurriculumData;
+  const [viewMode, setViewMode] = useState(data.mode);
+  const [selectedCourseId, setSelectedCourseId] = useState(data.courses[0]?.course.id ?? "");
+  const [selectedModuleId, setSelectedModuleId] = useState(data.courses[0]?.modules[0]?.id ?? "");
+  const selected = data.courses.find((item) => item.course.id === selectedCourseId) ?? data.courses[0];
+  const selectedModule = selected?.modules.find((module) => module.id === selectedModuleId) ?? selected?.modules[0];
+  if (!selected) return null;
+  return <section className="page-artifact artifact-curriculum" id={artifact.id} data-agent-artifact>
+    <ArtifactHeader artifact={artifact} onClose={onClose} />
+    <div className="artifact-body">
+      <div className="curriculum-heading"><div><h2>{artifact.title}</h2><p className="artifact-subtitle">{artifact.subtitle}</p></div><div className="curriculum-view-tabs">{(["flow", "mesh", "compare"] as const).map((mode) => <button key={mode} className={viewMode === mode ? "is-active" : ""} onClick={() => setViewMode(mode)}>{mode === "flow" ? "Flujo" : mode === "mesh" ? "Malla" : "Comparar"}</button>)}</div></div>
+      {viewMode !== "compare" && data.courses.length > 1 && <label className="curriculum-course-select"><span>Curso visible</span><select value={selectedCourseId} onChange={(event) => { setSelectedCourseId(event.target.value); setSelectedModuleId(data.courses.find((item) => item.course.id === event.target.value)?.modules[0]?.id ?? ""); }}>{data.courses.map((item) => <option key={item.course.id} value={item.course.id}>{item.course.title}</option>)}</select></label>}
+      {viewMode === "flow" && <div className="curriculum-flow">{selected.modules.map((module, index) => <div className="curriculum-flow-step" key={module.id}><button className={`curriculum-node stage-${module.stage} ${selectedModule?.id === module.id ? "is-selected" : ""}`} onClick={() => setSelectedModuleId(module.id)}><span>{String(index + 1).padStart(2, "0")}</span><strong>{module.title}</strong><small>{module.hours} horas · {stageLabel(module.stage)}</small></button>{index < selected.modules.length - 1 && <div className="curriculum-arrow" aria-hidden="true">↓</div>}</div>)}</div>}
+      {viewMode === "mesh" && <div className="curriculum-mesh-layout"><div className="curriculum-mesh">{selected.modules.map((module) => <button className={`curriculum-mesh-node stage-${module.stage} ${selectedModule?.id === module.id ? "is-selected" : ""}`} key={module.id} onClick={() => setSelectedModuleId(module.id)}><span>{module.sequence}</span><strong>{module.title}</strong><small>{module.hours}h</small></button>)}</div><aside className="curriculum-focus"><span className="reading-kicker">Módulo seleccionado</span><h3>{selectedModule?.title}</h3><p>{selectedModule?.prerequisites.length ? `Precede: ${selectedModule.prerequisites.join(" · ")}` : "Sin prerrequisitos adicionales."}</p><span className="curriculum-stage-label">{selectedModule ? stageLabel(selectedModule.stage) : ""}</span></aside></div>}
+      {viewMode === "compare" && <div className="curriculum-compare-grid">{data.courses.map(({ course, modules }) => <div className="curriculum-track" key={course.id}><div className="curriculum-track-head"><span className="course-code">{course.code}</span><h3>{course.title}</h3><small>{modules.length} módulos · {course.duration}</small></div>{modules.map((module, index) => <div className={`curriculum-track-node stage-${module.stage}`} key={module.id}><span>{index + 1}</span><strong>{module.title}</strong><small>{module.hours}h · {stageLabel(module.stage)}</small></div>)}</div>)}</div>}
+      <p className="curriculum-disclaimer">La malla es una visualización del snapshot local de demostración. Las conexiones representan orden de contenidos y prerrequisitos declarados o inferidos desde la secuencia del curso; deben validarse con el programa académico oficial.</p>
+    </div>
+    <SourceRow ids={artifact.sources} />
+  </section>;
+}
+
 export function PageArtifactView({ artifact, onClose }: { artifact: AgentUIArtifact; onClose: () => void }) {
-  const element = artifact.type === "comparison" ? <ComparisonArtifact artifact={artifact} onClose={onClose} /> : artifact.type === "course-list" ? <CourseListArtifact artifact={artifact} onClose={onClose} /> : artifact.type === "summary" ? <SummaryArtifact artifact={artifact} onClose={onClose} /> : artifact.type === "recommendation" ? <RecommendationArtifact artifact={artifact} onClose={onClose} /> : <SummaryArtifact artifact={artifact} onClose={onClose} />;
+  const element = artifact.type === "comparison" ? <ComparisonArtifact artifact={artifact} onClose={onClose} /> : artifact.type === "curriculum" ? <CurriculumArtifact artifact={artifact} onClose={onClose} /> : artifact.type === "course-list" ? <CourseListArtifact artifact={artifact} onClose={onClose} /> : artifact.type === "summary" ? <SummaryArtifact artifact={artifact} onClose={onClose} /> : artifact.type === "recommendation" ? <RecommendationArtifact artifact={artifact} onClose={onClose} /> : <SummaryArtifact artifact={artifact} onClose={onClose} />;
   return <div className="artifact-wrap">{element}<button className="artifact-dismiss" onClick={onClose}><RotateCcw size={14} /> Descartar esta vista</button></div>;
 }

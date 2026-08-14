@@ -57,8 +57,32 @@ export type AgentMessage = {
   isStreaming?: boolean;
 };
 
+export type CurriculumStage = "base" | "core" | "applied" | "capstone";
+
+export type CurriculumModule = {
+  id: string;
+  title: string;
+  stage: CurriculumStage;
+  sequence: number;
+  hours: number;
+  prerequisites: string[];
+};
+
+export type CurriculumCourse = {
+  course: Course;
+  modules: CurriculumModule[];
+};
+
+export type CurriculumViewMode = "flow" | "mesh" | "compare";
+
+export type CurriculumData = {
+  courses: CurriculumCourse[];
+  mode: CurriculumViewMode;
+};
+
 export type ArtifactType =
   | "comparison"
+  | "curriculum"
   | "summary"
   | "recommendation"
   | "timeline"

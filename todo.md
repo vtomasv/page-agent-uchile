@@ -28,6 +28,15 @@
 - [x] Verificar que la comparación cree un artifact visible con fuentes y datos correctos.
 - [x] Ejecutar checks/build y publicar la corrección en GitHub.
 
+## Mallas y gráficos dinámicos
+
+- [x] Definir módulos, sesiones y precedencias para cada curso del snapshot.
+- [x] Añadir tipos y datos de malla al modelo local de cursos.
+- [x] Crear artifacts de gráfico comparativo, malla y flujo de precedencias.
+- [x] Conectar consultas naturales como “muéstrame la malla” y “compara las mallas”.
+- [x] Añadir pruebas de regresión para gráficos y precedencias.
+- [ ] Verificar visualmente, ejecutar build y publicar en GitHub.
+
 - [x] Leer la guía de persistent computing y confirmar el enfoque Docker compatible con WebDev.
 - [x] Añadir Dockerfile de producción y configuración de prueba aislada.
 - [x] Añadir documentación de build, ejecución, puertos y limitaciones del contenedor.

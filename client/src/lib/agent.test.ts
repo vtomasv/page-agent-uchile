@@ -10,4 +10,17 @@ describe("Page Agent comparison intent", () => {
     expect(result.artifact?.data).toMatchObject({ courses: expect.arrayContaining([expect.objectContaining({ price: expect.any(String), startDate: expect.any(String) })]) });
     expect(result.sources.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("creates a curriculum artifact from a course page request", () => {
+    const result = answerGrounded("Muéstrame la malla, módulos y precedencias", "/cursos/machine-learning", [], DEFAULT_CONFIG);
+    expect(result.status).toBe("grounded");
+    expect(result.artifact?.type).toBe("curriculum");
+    expect(result.artifact?.data).toMatchObject({ mode: "flow", courses: expect.arrayContaining([expect.objectContaining({ modules: expect.arrayContaining([expect.objectContaining({ prerequisites: expect.any(Array) })]) })]) });
+  });
+
+  it("creates a parallel curriculum comparison from explicit course names", () => {
+    const result = answerGrounded("Compara las mallas de Machine Learning y Deep Learning", "/cursos", [], DEFAULT_CONFIG);
+    expect(result.artifact?.type).toBe("curriculum");
+    expect(result.artifact?.data).toMatchObject({ mode: "compare", courses: expect.arrayContaining([expect.objectContaining({ course: expect.objectContaining({ id: "machine-learning" }) }), expect.objectContaining({ course: expect.objectContaining({ id: "deep-learning" }) })]) });
+  });
 });

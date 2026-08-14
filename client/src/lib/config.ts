@@ -28,7 +28,7 @@ export const DEFAULT_CONFIG: HarnessConfig = {
     tts: { engine: "speechSynthesis", modelId: "Xenova/speecht5_tts", voice: "es-ES", speed: 1 },
   },
   prompt: { system: DEFAULT_SYSTEM_PROMPT, language: "es", detail: "balanced" },
-  tools: { search_site: true, get_current_page: true, get_course: true, compare_courses: true, navigate: true, scroll_to: true, highlight: true, render_artifact: true, remove_artifact: true, speak: true },
+  tools: { search_site: true, get_current_page: true, get_course: true, compare_courses: true, render_artifact: true, render_curriculum: true, navigate: true, scroll_to: true, highlight: true, remove_artifact: true, speak: true },
   retrieval: { chunkSize: 480, overlap: 80, topK: 5, similarityThreshold: 0.12, currentPageBoost: 0.18, embeddingModel: "Xenova/multilingual-e5-small" },
   memory: { mode: "session", maxTurns: 8, maxTokensApprox: 2200, includeGeneratedArtifacts: true },
   voice: { enabled: true, autoplay: false, language: "es-CL", speed: 1 },

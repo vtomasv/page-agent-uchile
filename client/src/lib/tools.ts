@@ -1,9 +1,9 @@
 // Style reminder: Archivo editorial cívico — tools are deterministic, typed, and never execute model-provided HTML.
 
-import { courseById, courses, courseChunks } from "@/content/courses";
+import { courseById, courses, courseChunks, curriculumByCourse } from "@/content/courses";
 import { siteChunks } from "@/content/site";
 import { retrieveLocal, type RetrievedChunk } from "@/lib/retrieval";
-import type { AgentUIArtifact, ContextChunk, Course, RetrievalConfig } from "@/lib/types";
+import type { AgentUIArtifact, ContextChunk, Course, CurriculumData, CurriculumViewMode, RetrievalConfig } from "@/lib/types";
 
 export type ToolContext = { route: string; currentChunks: ContextChunk[]; retrieval: RetrievalConfig };
 
@@ -16,6 +16,7 @@ export const toolDescriptions = [
   ["scroll_to", "Desplaza la lectura hacia una sección ya existente."],
   ["highlight", "Destaca temporalmente la fuente asociada."],
   ["render_artifact", "Crea una visualización a través de un componente aprobado."],
+  ["render_curriculum", "Construye una malla, flujo de precedencias o comparación paralela de cursos."],
   ["remove_artifact", "Retira una visualización temporal."],
   ["speak", "Lee un mensaje mediante una voz local o del navegador."],
 ] as const;
@@ -56,6 +57,22 @@ export function createComparisonArtifact(courseIds: string[]): AgentUIArtifact |
   const data = compareCourses(courseIds);
   if (!data) return undefined;
   return { id: `comparison-${courseIds.join("-")}-${Date.now()}`, type: "comparison", title: "Una comparación para seguir leyendo", subtitle: "Datos del snapshot local, con interpretación separada.", sources: data.courses.map((course) => `course:${course.id}:overview`), data, placement: { mode: "top" }, createdAt: Date.now() };
+}
+
+export function resolveCurriculumCourseIds(query: string, route: string, currentChunks: ContextChunk[] = []) {
+  const explicit = matchCourseIds(query);
+  if (explicit.length) return explicit;
+  const visibleCourseIds = Array.from(new Set(currentChunks.filter((chunk) => chunk.entityType === "course").map((chunk) => chunk.entityId ?? chunk.id.split(":")[1]).filter(Boolean)));
+  if (visibleCourseIds.length) return visibleCourseIds;
+  const routeCourse = courses.find((course) => `/cursos/${course.slug}` === route);
+  return routeCourse ? [routeCourse.id] : courses.slice(0, 3).map((course) => course.id);
+}
+
+export function createCurriculumArtifact(courseIds: string[], mode: CurriculumViewMode = "flow"): AgentUIArtifact | undefined {
+  const selected = courseIds.map((id) => courseById[id]).filter(Boolean).slice(0, 4);
+  if (!selected.length) return undefined;
+  const data: CurriculumData = { courses: selected.map((course) => ({ course, modules: curriculumByCourse[course.id] ?? [] })), mode };
+  return { id: `curriculum-${courseIds.join("-")}-${Date.now()}`, type: "curriculum", title: mode === "compare" ? "Mallas en paralelo" : `Malla · ${selected[0].title}`, subtitle: "Flujo de aprendizaje y precedencias del snapshot local.", sources: selected.map((course) => `course:${course.id}:curriculum`), data, placement: { mode: "top" }, createdAt: Date.now() };
 }
 
 export function createSummaryArtifact(course: Course): AgentUIArtifact {

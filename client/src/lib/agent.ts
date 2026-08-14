@@ -2,7 +2,7 @@
 
 import { courses, courseById } from "@/content/courses";
 import { siteChunks } from "@/content/site";
-import { createComparisonArtifact, createCourseListArtifact, createRecommendationArtifact, createSummaryArtifact, matchCourseIds, resolveComparisonCourseIds, searchSite, type ToolContext } from "@/lib/tools";
+import { createComparisonArtifact, createCourseListArtifact, createCurriculumArtifact, createRecommendationArtifact, createSummaryArtifact, matchCourseIds, resolveComparisonCourseIds, resolveCurriculumCourseIds, searchSite, type ToolContext } from "@/lib/tools";
 import type { AgentMessage, AgentSource, AgentUIArtifact, ComparisonData, ContextChunk, HarnessConfig } from "@/lib/types";
 
 export type AgentResult = { answer: string; sources: AgentSource[]; artifact?: AgentUIArtifact; suggestedRoute?: string; status: "grounded" | "unknown" };
@@ -28,9 +28,18 @@ export function answerGrounded(query: string, route: string, currentChunks: Cont
   const hasComparisonIntent = /(diferencia|compar|versus|\bvs\b|conviene|mejor entre|más barato|mas barato|más corto|mas corto|dura menos|precios?\s+y\s+(plazos?|duracion|duración)|plazos?\s+y\s+precios?)/i.test(normalized);
   const comparisonIds = hasComparisonIntent ? resolveComparisonCourseIds(query, currentChunks) : ids;
   const isComparison = hasComparisonIntent && comparisonIds.length >= 2;
+  const asksForCurriculum = /(malla|flujo|precedencia|prerequis|ramos|módul|modul|ruta de aprendizaje|plan del curso)/i.test(normalized);
+  const curriculumIds = asksForCurriculum ? resolveCurriculumCourseIds(query, route, currentChunks) : [];
+  const isCurriculumComparison = asksForCurriculum && /(compar|versus|\bvs\b|entre|paralelo)/i.test(normalized) && curriculumIds.length >= 2;
   const asksForList = /(qué cursos|que cursos|cursos de|opciones|lista|disponibles)/i.test(normalized) && /(ia|inteligencia|datos|python|software|curso)/i.test(normalized);
   const asksForSummary = /(resume|resumen|sintetiza|de qué trata|de que trata)/i.test(normalized);
   const asksForRecommendation = /(recomienda|recomend|apropiado|conviene|cuál elegir|cual elegir)/i.test(normalized);
+
+  if (asksForCurriculum) {
+    const artifact = createCurriculumArtifact(curriculumIds, isCurriculumComparison ? "compare" : "flow");
+    const compared = curriculumIds.map((id) => courseById[id]?.title).filter(Boolean).join(", ").replace(/, ([^,]*)$/, " y $1");
+    return { status: "grounded", answer: isCurriculumComparison ? `Preparé una vista comparativa de las mallas de ${compared}. Puedes cambiar entre flujo, malla y comparación para revisar módulos y precedencias.` : `Preparé la malla de ${compared}. La vista separa etapas, horas y prerrequisitos para que puedas seguir el recorrido del curso.`, sources: artifact ? artifact.sources.map((id: string) => { const idPart = id.split(":")[1]; const course = courseById[idPart]; return { id, label: `${course?.title ?? "Curso"} · malla`, route: course ? `/cursos/${course.slug}` : route }; }) : sources, artifact: artifact ?? undefined };
+  }
 
   if (isComparison) {
     const artifact = createComparisonArtifact(comparisonIds.slice(0, 3));
