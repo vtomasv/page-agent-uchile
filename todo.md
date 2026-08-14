@@ -20,6 +20,14 @@
 - [x] Verificar que las rutas ejecutadas ya no dependan de `/manus-storage`.
 - [ ] Ejecutar checks/build y publicar la corrección en GitHub.
 
+## Comparación y advertencia unload
+
+- [x] Identificar el origen del listener `unload` obsoleto en `/admin`.
+- [x] Revisar el parser de intención y el registro de la herramienta de comparación.
+- [x] Añadir soporte explícito para consultas de precios, costos, duración y plazos.
+- [x] Verificar que la comparación cree un artifact visible con fuentes y datos correctos.
+- [x] Ejecutar checks/build y publicar la corrección en GitHub.
+
 - [x] Leer la guía de persistent computing y confirmar el enfoque Docker compatible con WebDev.
 - [x] Añadir Dockerfile de producción y configuración de prueba aislada.
 - [x] Añadir documentación de build, ejecución, puertos y limitaciones del contenedor.

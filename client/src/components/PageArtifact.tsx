@@ -5,6 +5,8 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { useAgent } from "@/contexts/AgentContext";
 import { SourceChip } from "@/components/SourceChip";
+import { courseChunks } from "@/content/courses";
+import { siteChunks } from "@/content/site";
 import type { AgentUIArtifact, ComparisonData, Course } from "@/lib/types";
 
 function ArtifactHeader({ artifact, onClose }: { artifact: AgentUIArtifact; onClose: () => void }) {
@@ -14,7 +16,8 @@ function ArtifactHeader({ artifact, onClose }: { artifact: AgentUIArtifact; onCl
 
 function SourceRow({ ids }: { ids: string[] }) {
   const { currentChunks } = useAgent();
-  return <div className="artifact-sources"><span>Fuentes</span>{ids.slice(0, 3).map((id) => <SourceChip key={id} source={{ id, chunkId: id, label: currentChunks.find((chunk) => chunk.id === id)?.heading ?? id.split(":").slice(0, 2).join(" · "), route: currentChunks.find((chunk) => chunk.id === id)?.route ?? "/" }} />)}</div>;
+  const allChunks = [...currentChunks, ...siteChunks, ...courseChunks];
+  return <div className="artifact-sources"><span>Fuentes</span>{ids.slice(0, 3).map((id) => { const chunk = allChunks.find((item) => item.id === id); return <SourceChip key={id} source={{ id, chunkId: id, label: chunk?.heading ?? id.split(":").slice(0, 2).join(" · "), route: chunk?.route ?? "/" }} />; })}</div>;
 }
 
 function ComparisonArtifact({ artifact, onClose }: { artifact: AgentUIArtifact; onClose: () => void }) {

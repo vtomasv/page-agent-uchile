@@ -44,7 +44,7 @@ export function compareCourses(courseIds: string[]) {
     categorySet.size === 1 ? `Comparten el foco de ${selected[0].category.toLocaleLowerCase("es-CL")}.` : "Permiten construir rutas complementarias de aprendizaje.",
   ];
   const differences = [
-    { label: "Inicio", values: selected.map((course) => course.startDate) },
+    { label: "Inicio / plazo", values: selected.map((course) => course.startDate) },
     { label: "Duración", values: selected.map((course) => course.duration) },
     { label: "Precio", values: selected.map((course) => course.price) },
     { label: "Foco", values: selected.map((course) => course.shortDescription) },
@@ -76,4 +76,12 @@ export function matchCourseIds(query: string) {
     const terms = [course.id, course.title, course.slug, course.category, ...course.contents].join(" ").toLocaleLowerCase("es-CL");
     return terms.split(/\s+/).some((term) => term.length > 4 && normalized.includes(term)) || normalized.includes(course.id.replace(/-/g, " "));
   }).map((course) => course.id);
+}
+
+export function resolveComparisonCourseIds(query: string, currentChunks: ContextChunk[] = []) {
+  const explicit = matchCourseIds(query);
+  if (explicit.length >= 2) return explicit;
+  const visibleCourseIds = Array.from(new Set(currentChunks.filter((chunk) => chunk.entityType === "course").map((chunk) => chunk.entityId ?? chunk.id.split(":")[1]).filter(Boolean)));
+  if (visibleCourseIds.length >= 2) return visibleCourseIds;
+  return courses.slice(0, 3).map((course) => course.id);
 }

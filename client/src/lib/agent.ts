@@ -2,8 +2,8 @@
 
 import { courses, courseById } from "@/content/courses";
 import { siteChunks } from "@/content/site";
-import { createComparisonArtifact, createCourseListArtifact, createRecommendationArtifact, createSummaryArtifact, matchCourseIds, searchSite, type ToolContext } from "@/lib/tools";
-import type { AgentMessage, AgentSource, AgentUIArtifact, ContextChunk, HarnessConfig } from "@/lib/types";
+import { createComparisonArtifact, createCourseListArtifact, createRecommendationArtifact, createSummaryArtifact, matchCourseIds, resolveComparisonCourseIds, searchSite, type ToolContext } from "@/lib/tools";
+import type { AgentMessage, AgentSource, AgentUIArtifact, ComparisonData, ContextChunk, HarnessConfig } from "@/lib/types";
 
 export type AgentResult = { answer: string; sources: AgentSource[]; artifact?: AgentUIArtifact; suggestedRoute?: string; status: "grounded" | "unknown" };
 
@@ -25,15 +25,19 @@ export function answerGrounded(query: string, route: string, currentChunks: Cont
   const retrieved = searchSite(query, context);
   const sources = buildSources(retrieved);
   const ids = matchCourseIds(query);
-  const isComparison = /(diferencia|compar|versus|\bvs\b|conviene|mejor entre)/i.test(normalized) && ids.length >= 2;
+  const hasComparisonIntent = /(diferencia|compar|versus|\bvs\b|conviene|mejor entre|más barato|mas barato|más corto|mas corto|dura menos|precios?\s+y\s+(plazos?|duracion|duración)|plazos?\s+y\s+precios?)/i.test(normalized);
+  const comparisonIds = hasComparisonIntent ? resolveComparisonCourseIds(query, currentChunks) : ids;
+  const isComparison = hasComparisonIntent && comparisonIds.length >= 2;
   const asksForList = /(qué cursos|que cursos|cursos de|opciones|lista|disponibles)/i.test(normalized) && /(ia|inteligencia|datos|python|software|curso)/i.test(normalized);
   const asksForSummary = /(resume|resumen|sintetiza|de qué trata|de que trata)/i.test(normalized);
   const asksForRecommendation = /(recomienda|recomend|apropiado|conviene|cuál elegir|cual elegir)/i.test(normalized);
 
   if (isComparison) {
-    const artifact = createComparisonArtifact(ids.slice(0, 3));
-    const compared = ids.slice(0, 3).map((id) => courseById[id]?.title).filter(Boolean).join(" y ");
-    return { status: "grounded", answer: `Puedo comparar ${compared} con datos del catálogo local. La diferencia más visible está en el foco, la duración y los requisitos; dejé una comparación dentro de la página para revisar cada dimensión.`, sources: artifact ? buildSources(artifact.data && "courses" in (artifact.data as object) ? (artifact.data as { courses: ContextChunk[] }).courses as unknown as ContextChunk[] : []) : sources, artifact: artifact ?? undefined };
+    const artifact = createComparisonArtifact(comparisonIds.slice(0, 3));
+    const compared = comparisonIds.slice(0, 3).map((id) => courseById[id]?.title).filter(Boolean).join(", ").replace(/, ([^,]*)$/, " y $1");
+    const dimensions = /(precio|costo|barat)/i.test(normalized) && /(plazo|duracion|duración|inicio|fecha|cort)/i.test(normalized) ? "el precio y el plazo de inicio, además de la duración" : "el foco, la duración, el precio y los requisitos";
+    const comparisonData = artifact?.data as ComparisonData | undefined;
+    return { status: "grounded", answer: `Comparé ${compared} usando el snapshot local. La vista deja separados los datos objetivos y la interpretación; puedes revisar ${dimensions} y abrir cada ficha desde la comparación.`, sources: comparisonData ? comparisonData.courses.map((course) => ({ id: `course:${course.id}:overview`, label: `${course.title} · información del curso`, route: `/cursos/${course.slug}` })) : sources, artifact: artifact ?? undefined };
   }
 
   if (asksForList) {
