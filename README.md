@@ -66,6 +66,8 @@ El chat flotante soporta memoria de sesión o persistente, sugerencias, estado d
 
 La integración de inferencia local está preparada con `@huggingface/transformers` **4.2.0**, `llm.worker.ts`, `embedding.worker.ts` y `audio.worker.ts`. El modelo LLM se carga bajo demanda desde Admin con `WebGPU → WASM/CPU`, cuantización configurable y progreso de descarga. La demo no intenta descargarlo al abrir la página para no bloquear la navegación: el camino determinista grounded sigue funcionando mientras el modelo no ha sido cargado.
 
+El worker no busca pesos en rutas relativas del sitio: `allowLocalModels` está desactivado porque este repositorio no empaqueta los gigabytes del modelo. La primera carga se resuelve desde Hugging Face y luego usa la caché del navegador. Si aparece `Unexpected token '<'`, limpia la caché de la aplicación, desactiva temporalmente bloqueadores que intercepten `huggingface.co`, recarga y prueba nuevamente desde `/admin`.
+
 ## Modelo de seguridad y grounding
 
 El contenido del snapshot se trata como datos no confiables. El prompt por defecto prohíbe inventar fechas, precios, docentes, requisitos o contenidos, y el controller responde “no hay información suficiente” cuando no puede encontrar una fuente local. Las fuentes aparecen como chips clicables que intentan llevar al elemento de origen y lo resaltan brevemente.

@@ -45,6 +45,13 @@
 - [x] Añadir pruebas de regresión de las acciones Admin.
 - [ ] Verificar Admin, build y publicar la corrección.
 
+## Error de carga del modelo
+
+- [x] Auditar configuración de Transformers.js, model ID y respuesta HTTP.
+- [x] Evitar que el worker intente interpretar HTML como metadata JSON.
+- [x] Mostrar un diagnóstico accionable cuando el modelo o sus archivos no estén disponibles.
+- [ ] Verificar worker, build y carga desde Admin; publicar la corrección.
+
 - [x] Leer la guía de persistent computing y confirmar el enfoque Docker compatible con WebDev.
 - [x] Añadir Dockerfile de producción y configuración de prueba aislada.
 - [x] Añadir documentación de build, ejecución, puertos y limitaciones del contenedor.

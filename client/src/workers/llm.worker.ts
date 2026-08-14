@@ -2,7 +2,10 @@ import { pipeline, TextStreamer, env } from "@huggingface/transformers";
 import type { WorkerEvent, WorkerRequest } from "@/lib/types";
 
 env.allowRemoteModels = true;
-env.allowLocalModels = true;
+// This prototype does not bundle model weights. Keeping local resolution enabled
+// makes Vite/Nginx return index.html for missing model paths, which then appears
+// as `Unexpected token '<'` while Transformers.js parses JSON metadata.
+env.allowLocalModels = false;
 env.useBrowserCache = true;
 
 let generator: any;
@@ -46,6 +49,10 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
       send({ type: "complete", requestId: message.requestId, payload: { text } });
     }
   } catch (error) {
-    send({ type: "error", requestId: "requestId" in message ? message.requestId : undefined, message: error instanceof Error ? error.message : "Error al ejecutar el modelo local." });
+    const rawMessage = error instanceof Error ? error.message : "Error al ejecutar el modelo local.";
+    const messageText = rawMessage.includes("Unexpected token '<'") || rawMessage.includes("<!doctype")
+      ? "La descarga del modelo recibió HTML en vez de metadata JSON. Se desactivó la búsqueda local; verifica conexión a Hugging Face, bloqueadores del navegador y vuelve a cargar."
+      : rawMessage;
+    send({ type: "error", requestId: "requestId" in message ? message.requestId : undefined, message: messageText });
   }
 };
